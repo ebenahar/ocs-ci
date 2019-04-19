@@ -17,7 +17,7 @@ dispatcher class Exec.
 from collections import namedtuple
 import logging
 
-from Exceptions import CommandFailed
+from .Exceptions import CommandFailed
 
 # Upstream KubernetesClient
 from kubernetes import config
@@ -77,10 +77,10 @@ class Exec(object):
         """
         # Get api-client specific object
         apiclnt = _clsmap[self.oc_client]()
-        logger.info("Instantiated api-client {}".format(self.oc_client))
-        return apiclnt.run(podname,
-                           namespace,
-                           cmd_obj)
+        logger.info(f"Instantiated api-client {self.oc_client}")
+        return apiclnt.run(
+            podname, namespace, cmd_obj
+        )
 
 
 @register_class
@@ -107,8 +107,9 @@ class KubClient(object):
         ret = None
 
         try:
-            resp = self.api.read_namespaced_pod(name=podname,
-                                                namespace=namespace)
+            resp = self.api.read_namespaced_pod(
+                name=podname, namespace=namespace
+            )
             logger.info(resp)
         except ApiException as ex:
             if ex.status != 404:
@@ -116,13 +117,13 @@ class KubClient(object):
 
         # run command in bash
         bash = ['/bin/bash']
-        resp = stream(self.api.connect_get_namespaced_pod_exec,
-                      podname,
-                      namespace,
-                      command=bash,
-                      stderr=True, stdin=True,
-                      stdout=True, tty=False,
-                      _preload_content=False)
+        resp = stream(
+            self.api.connect_get_namespaced_pod_exec,
+            podname, namespace,
+            command=bash, stderr=True,
+            stdin=True, stdout=True,
+            tty=False, _preload_content=False
+        )
         done = False
         outbuf = ''
         while resp.is_open():
@@ -153,12 +154,16 @@ class KubClient(object):
             try:
                 ret = int(resp.readline_stdout(timeout=5))
             except (ValueError, TypeError):
-                logger.error("TimeOut: Command timedout after {}".format(cmd_obj.timeout))
-                raise CommandFailed(" Failed to run \"{cmd}\"".
-                                    format(cmd=cmd_obj.cmd))
+                logger.error(
+                    f"TimeOut: Command timedout after {cmd_obj.timeout}"
+                )
+                raise CommandFailed(
+                    f"Failed to run \"{cmd_obj.cmd}\""
+                )
+            finally:
+                resp.close()
 
-        resp.close()
         if outbuf:
             stdout = outbuf
 
-        return (stdout, stderr, ret)
+        return stdout, stderr, ret
