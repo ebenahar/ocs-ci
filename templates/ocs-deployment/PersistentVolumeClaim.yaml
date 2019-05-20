@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ pv_name | default('ocsci-pv') }}
+  namespace: {{ cluster_namespace | default('openshift-storage') }}
+spec:
+  accessModes:
+  - {{ access_mode | default('ReadWriteOnce') }}
+  resources:
+    requests:
+      storage: {{ pv_size | default('5Gi') }}
+  storageClassName: {{ storageclass_namespace | default('slow') }}
