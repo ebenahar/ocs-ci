@@ -24,6 +24,7 @@ TEMPLATE_CSI_RBD_DIR = os.path.join(TEMPLATE_CSI_DIR, "rbd")
 TEMPLATE_CSI_FS_DIR = os.path.join(TEMPLATE_CSI_DIR, "cephfs")
 TEMPLATE_PV_PVC_DIR = os.path.join(TEMPLATE_DIR, "pv_pvc")
 TEMPLATE_APP_POD_DIR = os.path.join(TEMPLATE_DIR, "app-pods")
+
 STORAGE_API_VERSION = 'storage.k8s.io/v1'
 ROOK_API_VERSION = 'ceph.rook.io/v1'
 OCP_API_VERSION = 'project.openshift.io/v1'
@@ -57,6 +58,7 @@ STATUS_PENDING = 'Pending'
 STATUS_AVAILABLE = 'Available'
 STATUS_RUNNING = 'Running'
 STATUS_TERMINATING = 'Terminating'
+STATUS_BOUND = 'Bound'
 
 # This section is suppose to be available just from ocsci/config.py module from
 # ENV_DATA dictionary. Once we drop support of old runner we will delete this
@@ -102,8 +104,33 @@ CEPHFILESYSTEM_DICT = load_yaml_to_dict(
         TEMPLATE_CSI_FS_DIR, "CephFileSystem.yaml"
     )
 )
-PVC_DICT = load_yaml_to_dict(
+CEPHBLOCKPOOL_DICT = load_yaml_to_dict(
+    os.path.join(
+        TEMPLATE_DEPLOYMENT_DIR, "cephblockpool.yaml"
+    )
+)
+CSI_RBD_STORAGECLASS_DICT = load_yaml_to_dict(
+    os.path.join(
+        TEMPLATE_CSI_RBD_DIR, "storageclass.yaml"
+    )
+)
+CSI_PVC_DICT = load_yaml_to_dict(
     os.path.join(
         TEMPLATE_PV_PVC_DIR, "PersistentVolumeClaim.yaml"
+    )
+)
+CSI_RBD_POD_DICT = load_yaml_to_dict(
+    os.path.join(
+        TEMPLATE_CSI_RBD_DIR, "pod.yaml"
+    )
+)
+CSI_RBD_SECRET = load_yaml_to_dict(
+    os.path.join(
+        TEMPLATE_CSI_RBD_DIR, "secret.yaml"
+    )
+)
+CSI_CEPHFS_SECRET = load_yaml_to_dict(
+    os.path.join(
+        TEMPLATE_CSI_FS_DIR, "secret.yaml"
     )
 )
