@@ -2418,7 +2418,16 @@ class TimeoutSampler(object):
     def __iter__(self):
         if self.start_time is None:
             self.start_time = time.time()
+        iteration_count = 0
+        last_exception = None
+        log.info(
+            "Sampling %s every %ds for %ds",
+            self.func.__name__,
+            self.sleep,
+            self.timeout,
+        )
         while True:
+            iteration_count += 1
             self.last_sample_time = time.time()
             if self.timeout <= (self.last_sample_time - self.start_time):
                 self._raise_timeout()
