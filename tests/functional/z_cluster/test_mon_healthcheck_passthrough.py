@@ -3,6 +3,7 @@ import logging
 import pytest
 
 from ocs_ci.framework import config
+from ocs_ci.framework.pytest_customization.marks import ceph_deep
 from ocs_ci.framework.testlib import (
     ManageTest,
     tier2,
@@ -83,6 +84,7 @@ def _healthcheck_matches(actual, desired):
 
 @tier2
 @brown_squad
+@ceph_deep
 @skipif_external_mode
 @pytest.mark.polarion_id("OCS-7403")
 class TestMonHealthcheckPassthrough(ManageTest):

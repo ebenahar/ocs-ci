@@ -9,6 +9,7 @@ import pytest
 
 from ocs_ci.framework.pytest_customization.marks import (
     brown_squad,
+    ceph_deep,
     ec_allowed,
     green_squad,
     tier2,
@@ -57,6 +58,7 @@ def verify_active_and_standby_mds_count(target_count, timeout=180):
 
 
 @brown_squad
+@ceph_deep
 @tier4c
 @skipif_external_mode
 @skipif_hci_client
@@ -245,6 +247,7 @@ def cephfs_ec_storageclass(request):
 
 @ec_allowed
 @green_squad
+@ceph_deep
 @runs_on_provider
 @skipif_hci_client
 @skipif_external_mode

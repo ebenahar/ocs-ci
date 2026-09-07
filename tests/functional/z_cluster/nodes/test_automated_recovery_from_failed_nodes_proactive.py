@@ -2,7 +2,7 @@ import logging
 import pytest
 
 from ocs_ci.framework import config
-from ocs_ci.framework.pytest_customization.marks import brown_squad
+from ocs_ci.framework.pytest_customization.marks import brown_squad, ceph_deep
 from ocs_ci.framework.testlib import (
     tier4,
     tier4b,
@@ -28,6 +28,7 @@ log = logging.getLogger(__name__)
 
 
 @brown_squad
+@ceph_deep
 @tier4
 @tier4b
 @ignore_leftovers

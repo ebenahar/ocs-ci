@@ -110,6 +110,7 @@ mdr = pytest.mark.mdr
 resiliency = pytest.mark.resiliency
 chaos = pytest.mark.chaos
 ec_allowed = pytest.mark.ec_allowed
+ceph_deep = pytest.mark.ceph_deep
 
 tier_marks = [
     tier1,

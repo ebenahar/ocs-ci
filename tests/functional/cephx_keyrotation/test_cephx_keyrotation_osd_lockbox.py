@@ -12,6 +12,7 @@ import pytest
 
 from ocs_ci.framework import config
 from ocs_ci.framework.pytest_customization.marks import (
+    ceph_deep,
     green_squad,
     skipif_external_mode,
     skipif_ocs_version,
@@ -29,6 +30,7 @@ MIN_ENCRYPTED_OSD_COUNT = 1
 @skipif_external_mode
 @skipif_ocs_version(["<4.21", ">=4.23"])
 @green_squad
+@ceph_deep
 class TestCephXKeyRotationOSDLockbox:
     @pytest.mark.polarion_id("OCS-8135")
     @tier1

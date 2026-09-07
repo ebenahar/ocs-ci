@@ -4,6 +4,7 @@ import json
 from time import sleep
 
 from ocs_ci.framework.pytest_customization.marks import (
+    ceph_deep,
     tier1,
     tier2,
     green_squad,
@@ -38,6 +39,7 @@ log = logging.getLogger(__name__)
 @encryption_at_rest_required
 @skipif_kms_deployment
 @green_squad
+@ceph_deep
 class TestEncryptionKeyrotation:
     @pytest.fixture(autouse=True)
     def teardown(self, request):
@@ -283,6 +285,7 @@ class TestEncryptionKeyrotation:
 
 
 @green_squad
+@ceph_deep
 @tier1
 @encryption_at_rest_required
 @vault_kms_deployment_required

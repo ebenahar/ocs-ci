@@ -8,6 +8,7 @@ from ocs_ci.framework.pytest_customization.marks import (
     tier4a,
     tier4,
     jira,
+    ceph_deep,
 )
 from ocs_ci.helpers.cnv_helpers import cal_md5sum_vm
 from ocs_ci.helpers.stretchcluster_helper import (
@@ -26,6 +27,7 @@ logger = logging.getLogger(__name__)
 @tier4
 @stretchcluster_required
 @turquoise_squad
+@ceph_deep
 @jira("DFBUGS-1273")
 class TestDeviceReplacementInStretchCluster:
 

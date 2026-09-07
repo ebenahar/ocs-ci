@@ -23,6 +23,7 @@ from ocs_ci.framework.pytest_customization.marks import (
     skipif_hci_client,
     brown_squad,
     skipif_ibm_cloud_managed,
+    ceph_deep,
 )
 from ocs_ci.helpers.helpers import (
     verify_storagecluster_nodetopology,
@@ -202,6 +203,7 @@ def delete_and_create_osd_node(osd_node_name):
 
 
 @brown_squad
+@ceph_deep
 @tier4a
 @ignore_leftovers
 @ipi_deployment_required
@@ -285,6 +287,7 @@ class TestNodeReplacementWithIO(ManageTest):
 
 
 @brown_squad
+@ceph_deep
 @tier4a
 @ignore_leftovers
 @skipif_bmpsi
@@ -344,6 +347,7 @@ class TestNodeReplacement(ManageTest):
 
 @tier4a
 @brown_squad
+@ceph_deep
 @ignore_leftovers
 @pytest.mark.polarion_id("OCS-2535")
 @skipif_external_mode

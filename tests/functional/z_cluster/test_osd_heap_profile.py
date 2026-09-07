@@ -3,7 +3,7 @@ import pytest
 import time
 import random
 
-from ocs_ci.framework.pytest_customization.marks import brown_squad
+from ocs_ci.framework.pytest_customization.marks import brown_squad, ceph_deep
 from ocs_ci.framework.testlib import (
     ManageTest,
     tier2,
@@ -20,6 +20,7 @@ log = logging.getLogger(__name__)
 
 @runs_on_provider
 @brown_squad
+@ceph_deep
 @tier2
 @skipif_ocs_version("<4.6")
 @pytest.mark.polarion_id("OCS-2512")

@@ -9,7 +9,7 @@ import random
 import pytest
 
 from ocs_ci.framework import config
-from ocs_ci.framework.pytest_customization.marks import brown_squad
+from ocs_ci.framework.pytest_customization.marks import brown_squad, ceph_deep
 from ocs_ci.framework.testlib import (
     E2ETest,
     tier2,
@@ -31,6 +31,7 @@ DD_COUNT = 64
 
 
 @brown_squad
+@ceph_deep
 @tier2
 @pytest.mark.polarion_id("OCS-2733")
 @skipif_ocs_version("<4.9")

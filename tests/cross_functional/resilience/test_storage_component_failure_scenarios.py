@@ -5,6 +5,7 @@ from ocs_ci.framework.pytest_customization.marks import (
     green_squad,
     resiliency,
     polarion_id,
+    ceph_deep,
 )
 from ocs_ci.resiliency.resiliency_helper import Resiliency
 from ocs_ci.ocs.exceptions import UnexpectedBehaviour
@@ -13,6 +14,7 @@ log = logging.getLogger(__name__)
 
 
 @green_squad
+@ceph_deep
 @resiliency
 class TestStorageClusterComponentFailurescenarios:
     """

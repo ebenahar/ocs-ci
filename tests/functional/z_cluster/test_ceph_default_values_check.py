@@ -5,6 +5,7 @@ import pytest
 from ocs_ci.framework.pytest_customization.marks import (
     skipif_ocs_version,
     brown_squad,
+    ceph_deep,
 )
 from ocs_ci.framework.testlib import (
     ManageTest,
@@ -35,6 +36,7 @@ log = logging.getLogger(__name__)
 
 
 @brown_squad
+@ceph_deep
 @tier1
 @skipif_external_mode
 @pytest.mark.polarion_id("OCS-2231")

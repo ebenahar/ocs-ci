@@ -12,6 +12,7 @@ import pytest
 
 from ocs_ci.framework import config
 from ocs_ci.framework.pytest_customization.marks import (
+    ceph_deep,
     green_squad,
     skipif_external_mode,
     skipif_ocs_version,
@@ -43,6 +44,7 @@ POST_ROTATION_PVC_SIZE = 5
 @skipif_external_mode
 @skipif_ocs_version(["<4.21", ">=4.23"])
 @green_squad
+@ceph_deep
 class TestCephXKeyRotation:
     @pytest.mark.polarion_id("OCS-8128")
     @tier1
@@ -390,6 +392,7 @@ class TestCephXKeyRotation:
 @skipif_external_mode
 @skipif_ocs_version(["<4.21", ">=4.23"])
 @green_squad
+@ceph_deep
 class TestCephXKeyRotationIdempotency:
     @pytest.mark.polarion_id("OCS-8131")
     @tier1
@@ -465,6 +468,7 @@ class TestCephXKeyRotationIdempotency:
 @skipif_external_mode
 @skipif_ocs_version(["<4.21", ">=4.23"])
 @green_squad
+@ceph_deep
 class TestCephXKeyRotationIOContinuity:
     @pytest.mark.polarion_id("OCS-8132")
     @tier1

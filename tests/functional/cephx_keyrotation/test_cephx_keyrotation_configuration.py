@@ -10,6 +10,7 @@ import pytest
 
 from ocs_ci.framework import config
 from ocs_ci.framework.pytest_customization.marks import (
+    ceph_deep,
     green_squad,
     skipif_external_mode,
     skipif_ocs_version,
@@ -29,6 +30,7 @@ EXPECTED_INITIAL_GENERATION = 2
 @skipif_external_mode
 @skipif_ocs_version(["<4.21", ">=4.23"])
 @green_squad
+@ceph_deep
 @pytest.mark.order("first")
 class TestCephXKeyRotationPolicyDisabled:
     @pytest.mark.polarion_id("OCS-8133")
@@ -110,6 +112,7 @@ class TestCephXKeyRotationPolicyDisabled:
 @skipif_external_mode
 @skipif_ocs_version(["<4.21", ">=4.23"])
 @green_squad
+@ceph_deep
 class TestCephXAllowedCiphers:
     @pytest.fixture(autouse=True)
     def _teardown(self, request):

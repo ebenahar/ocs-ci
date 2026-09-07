@@ -11,6 +11,7 @@ from ocs_ci.ocs.resources.pod import (
 )
 from ocs_ci.ocs.resources.pod import get_deployments_having_label
 from ocs_ci.framework.pytest_customization.marks import (
+    ceph_deep,
     skipif_external_mode,
     brown_squad,
 )
@@ -24,6 +25,7 @@ log = logging.getLogger(__name__)
 
 
 @brown_squad
+@ceph_deep
 @tier2
 @polarion_id("OCS-2696")
 @skipif_external_mode
