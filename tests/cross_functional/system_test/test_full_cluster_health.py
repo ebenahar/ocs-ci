@@ -18,6 +18,7 @@ from ocs_ci.framework.pytest_customization.marks import (
     system_test,
     polarion_id,
     magenta_squad,
+    ceph_deep,
 )
 from ocs_ci.ocs.exceptions import TimeoutExpiredError
 from ocs_ci.ocs.benchmark_operator_fio import get_file_size, BenchmarkOperatorFIO
@@ -29,6 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 @magenta_squad
+@ceph_deep
 class TestFullClusterHealth(PASTest):
     """
     Test Cluster health when storage is ~82%

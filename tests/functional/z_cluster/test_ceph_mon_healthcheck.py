@@ -1,6 +1,7 @@
 import logging
 import pytest
 
+from ocs_ci.framework.pytest_customization.marks import ceph_deep
 from ocs_ci.framework.testlib import (
     ManageTest,
     ignore_leftovers,
@@ -34,6 +35,7 @@ log = logging.getLogger(__name__)
 
 
 @brown_squad
+@ceph_deep
 @ignore_leftovers
 class TestCephMonHealthCheck(ManageTest):
     """

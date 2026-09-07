@@ -6,6 +6,7 @@ from time import sleep
 from ocs_ci.ocs import constants, node
 from ocs_ci.framework.pytest_customization.marks import (
     brown_squad,
+    ceph_deep,
     skipif_hci_provider_and_client,
     skipif_tainted_nodes,
 )
@@ -19,6 +20,7 @@ log = logging.getLogger(__name__)
 
 
 @brown_squad
+@ceph_deep
 @skipif_tainted_nodes
 @skipif_hci_provider_and_client
 class TestKernelCrash(E2ETest):

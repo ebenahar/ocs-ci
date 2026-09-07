@@ -4,7 +4,11 @@ import pytest
 
 from ocs_ci.ocs import node, constants
 from ocs_ci.framework import config
-from ocs_ci.framework.pytest_customization.marks import brown_squad, skipif_rosa_hcp
+from ocs_ci.framework.pytest_customization.marks import (
+    brown_squad,
+    ceph_deep,
+    skipif_rosa_hcp,
+)
 from ocs_ci.framework.testlib import (
     tier4a,
     ignore_leftovers,
@@ -40,6 +44,7 @@ logger = logging.getLogger(__name__)
 
 
 @brown_squad
+@ceph_deep
 @tier4a
 @ignore_leftovers
 class TestDiskFailures(ManageTest):

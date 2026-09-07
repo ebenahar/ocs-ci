@@ -5,6 +5,7 @@ import time
 from ocs_ci.ocs import ocp, constants
 from ocs_ci.framework.pytest_customization.marks import (
     brown_squad,
+    ceph_deep,
     post_ocs_upgrade,
     skipif_less_than_five_workers,
 )
@@ -45,6 +46,7 @@ HEALTH_CHECK_RETRIES = 150  # number of retries for health check
 
 
 @brown_squad
+@ceph_deep
 @skipif_less_than_five_workers
 @skipif_ocs_version("<4.15")
 class TestFiveMonInCluster(ManageTest):

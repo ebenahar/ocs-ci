@@ -6,6 +6,7 @@ from ocs_ci.framework.pytest_customization.marks import (
     tier1,
     polarion_id,
     turquoise_squad,
+    ceph_deep,
 )
 from ocs_ci.helpers.cnv_helpers import cal_md5sum_vm
 from ocs_ci.helpers.stretchcluster_helper import (
@@ -33,6 +34,7 @@ log = logging.getLogger(__name__)
 
 @tier1
 @turquoise_squad
+@ceph_deep
 @stretchcluster_required
 class TestGracefulRestart:
 

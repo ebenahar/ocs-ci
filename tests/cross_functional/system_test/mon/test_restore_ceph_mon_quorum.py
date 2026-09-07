@@ -10,6 +10,7 @@ from ocs_ci.framework.pytest_customization.marks import (
     ignore_leftovers,
     skipif_external_mode,
     magenta_squad,
+    ceph_deep,
 )
 from ocs_ci.framework.testlib import E2ETest
 from ocs_ci.ocs import constants
@@ -32,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 
 @magenta_squad
+@ceph_deep
 @ignore_leftovers
 @system_test
 @skipif_ocs_version("<4.9")

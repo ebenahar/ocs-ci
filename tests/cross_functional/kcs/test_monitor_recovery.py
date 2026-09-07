@@ -15,6 +15,7 @@ from ocs_ci.framework.pytest_customization.marks import (
     system_test,
     skipif_ocp_version,
     magenta_squad,
+    ceph_deep,
 )
 from ocs_ci.helpers.sanity_helpers import Sanity
 from ocs_ci.ocs.ocp import OCP, switch_to_project
@@ -73,6 +74,7 @@ NODE_RESTART_COOLDOWN = 300
 
 
 @magenta_squad
+@ceph_deep
 @system_test
 @ignore_leftovers
 @pytest.mark.order("last")

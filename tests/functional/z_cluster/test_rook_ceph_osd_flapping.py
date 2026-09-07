@@ -13,7 +13,7 @@ from ocs_ci.helpers.helpers import (
 )
 from ocs_ci.ocs.cluster import ceph_health_check
 from ocs_ci.ocs.resources import pod
-from ocs_ci.framework.pytest_customization.marks import brown_squad
+from ocs_ci.framework.pytest_customization.marks import brown_squad, ceph_deep
 from ocs_ci.framework.testlib import (
     ManageTest,
     tier2,
@@ -26,6 +26,7 @@ log = logging.getLogger(__name__)
 
 
 @brown_squad
+@ceph_deep
 @tier2
 @ignore_leftovers
 @skipif_external_mode

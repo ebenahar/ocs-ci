@@ -26,6 +26,7 @@ from ocs_ci.framework.pytest_customization.marks import (
     tier3,
     skipif_external_mode,
     magenta_squad,
+    ceph_deep,
 )
 from ocs_ci.ocs.defaults import OCS_OPERATOR_NAME
 from ocs_ci.helpers.helpers import wait_for_resource_state
@@ -35,6 +36,7 @@ logger = logging.getLogger(__name__)
 
 
 @magenta_squad
+@ceph_deep
 @tier3
 @pytest.mark.polarion_id("OCS-4942")
 @skipif_external_mode

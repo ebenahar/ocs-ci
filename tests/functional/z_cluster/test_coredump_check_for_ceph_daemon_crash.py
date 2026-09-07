@@ -6,7 +6,11 @@ from ocs_ci.utility.utils import TimeoutSampler
 from ocs_ci.helpers.disruption_helpers import Disruptions
 from ocs_ci.helpers.helpers import run_cmd_verify_cli_output
 from ocs_ci.utility.utils import ceph_health_check
-from ocs_ci.framework.pytest_customization.marks import skipif_rhel_os, brown_squad
+from ocs_ci.framework.pytest_customization.marks import (
+    skipif_rhel_os,
+    brown_squad,
+    ceph_deep,
+)
 from ocs_ci.framework.testlib import (
     ManageTest,
     tier2,
@@ -27,6 +31,7 @@ log = logging.getLogger(__name__)
 
 @runs_on_provider
 @brown_squad
+@ceph_deep
 @tier2
 @skipif_external_mode
 @skipif_ocs_version("<4.7")

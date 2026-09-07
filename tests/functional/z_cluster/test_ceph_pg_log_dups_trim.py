@@ -2,7 +2,7 @@ import logging
 import random
 import pytest
 
-from ocs_ci.framework.pytest_customization.marks import brown_squad
+from ocs_ci.framework.pytest_customization.marks import brown_squad, ceph_deep
 from ocs_ci.framework.testlib import (
     ManageTest,
     tier2,
@@ -29,6 +29,7 @@ log = logging.getLogger(__name__)
 
 
 @brown_squad
+@ceph_deep
 @tier2
 @skipif_external_mode
 @skipif_managed_service

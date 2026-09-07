@@ -15,6 +15,7 @@ import time
 import pytest
 from ocs_ci.framework import config
 from ocs_ci.framework.pytest_customization.marks import (
+    ceph_deep,
     green_squad,
     ignore_leftovers,
     skipif_external_mode,
@@ -485,6 +486,7 @@ def _induce_daemon_key_mismatch(rotator, namespace):
 @skipif_external_mode
 @skipif_ocs_version(["<4.21", ">=4.23"])
 @green_squad
+@ceph_deep
 class TestCephXKeyRotationMismatchMetric:
     """TC1–TC2: mismatch metric emission and in-sync (value 0) state."""
 
@@ -551,6 +553,7 @@ class TestCephXKeyRotationMismatchMetric:
 @skipif_external_mode
 @skipif_ocs_version(["<4.21", ">=4.23"])
 @green_squad
+@ceph_deep
 @ignore_leftovers
 class TestCephXKeyRotationMismatchAlertLifecycle:
     """TC3–TC6, TC18: induce mismatch, fire alert, recover, check MDS + health mutes."""
@@ -866,6 +869,7 @@ class TestCephXKeyRotationMismatchAlertLifecycle:
 @skipif_external_mode
 @skipif_ocs_version(["<4.21", ">=4.23"])
 @green_squad
+@ceph_deep
 class TestCephXKeyRotationMismatchNoFilesystem:
     """TC7: MDS mismatch metric is 0 when no CephFilesystem exists."""
 
@@ -896,6 +900,7 @@ class TestCephXKeyRotationMismatchNoFilesystem:
 @skipif_external_mode
 @skipif_ocs_version(["<4.21", ">=4.23"])
 @green_squad
+@ceph_deep
 class TestCephXCephClusterReconciliation:
     """TC8–TC13: CephCluster annotations and daemon keyGeneration reconciliation."""
 
@@ -1173,6 +1178,7 @@ class TestCephXCephClusterReconciliation:
 @skipif_external_mode
 @skipif_ocs_version(["<4.21", ">=4.23"])
 @green_squad
+@ceph_deep
 class TestCephXCephClientAnnotations:
     """TC14–TC15: CephClient created-with-cephx-features and keyType."""
 
@@ -1261,6 +1267,7 @@ class TestCephXCephClientAnnotations:
 @skipif_external_mode
 @skipif_ocs_version(["<4.21", ">=4.23"])
 @green_squad
+@ceph_deep
 @ignore_leftovers
 class TestCephXDesiredKeyGenNegative:
     """TC16: DESIRED_CEPHX_KEY_GEN env; TC17: StorageCluster keyGeneration types."""

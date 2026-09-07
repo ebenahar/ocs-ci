@@ -9,7 +9,7 @@ Polarion-ID- OCS-355
 import logging
 import pytest
 from ocs_ci.ocs import ocp, constants
-from ocs_ci.framework.pytest_customization.marks import brown_squad
+from ocs_ci.framework.pytest_customization.marks import brown_squad, ceph_deep
 from ocs_ci.framework.testlib import ManageTest, ignore_leftovers
 from ocs_ci.framework import config
 from ocs_ci.ocs.resources import pod
@@ -63,6 +63,7 @@ def run_io_on_pool(pool_obj):
 # tier4c
 @ignore_leftovers
 @brown_squad
+@ceph_deep
 # @pytest.mark.polarion_id("OCS-355")
 class TestRemoveMonFromCluster(ManageTest):
     pool_obj = ""

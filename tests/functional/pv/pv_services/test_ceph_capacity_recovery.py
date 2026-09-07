@@ -3,7 +3,7 @@ import time
 import pytest
 
 from ocs_ci.ocs.perftests import PASTest
-from ocs_ci.framework.pytest_customization.marks import green_squad
+from ocs_ci.framework.pytest_customization.marks import ceph_deep, green_squad
 from ocs_ci.framework.testlib import (
     tier2,
     skipif_ocs_version,
@@ -55,6 +55,7 @@ def check_health_status():
 
 @pytest.mark.skip(reason="Skipping this test temporarily due to ocs-ci 12263")
 @green_squad
+@ceph_deep
 @tier2
 @polarion_id("OCS-5399")
 @skipif_external_mode

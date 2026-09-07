@@ -2,6 +2,7 @@ import logging
 import pytest
 from ocs_ci.framework.pytest_customization.marks import (
     brown_squad,
+    ceph_deep,
     skipif_compact_mode,
     skipif_ibm_power,
     skipif_azure_platform,
@@ -51,6 +52,7 @@ deployment_type = config.ENV_DATA["deployment_type"].lower()
 
 
 @brown_squad
+@ceph_deep
 @ignore_leftovers
 @tier4b
 class TestAutomatedRecoveryFromFailedNodes(ManageTest):
@@ -247,6 +249,7 @@ class TestAutomatedRecoveryFromFailedNodes(ManageTest):
 
 
 @brown_squad
+@ceph_deep
 @ignore_leftovers
 @tier4a
 @skipif_ibm_cloud

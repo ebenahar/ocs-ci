@@ -11,6 +11,7 @@ import pytest
 
 from ocs_ci.framework import config
 from ocs_ci.framework.pytest_customization.marks import (
+    ceph_deep,
     green_squad,
     skipif_external_mode,
     skipif_ocs_version,
@@ -35,6 +36,7 @@ pytestmark = pytest.mark.skip(
 @skipif_external_mode
 @skipif_ocs_version(["<4.21", ">=4.23"])
 @green_squad
+@ceph_deep
 @pytest.mark.order("last")
 class TestCephXBootstrapKeyCleanup:
     @pytest.mark.polarion_id("OCS-8161")

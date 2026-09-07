@@ -3,6 +3,7 @@ import pytest
 
 from ocs_ci.framework.pytest_customization.marks import (
     brown_squad,
+    ceph_deep,
 )
 from ocs_ci.framework.testlib import (
     E2ETest,
@@ -20,6 +21,7 @@ log = logging.getLogger(__name__)
 
 @tier2
 @brown_squad
+@ceph_deep
 @skipif_external_mode
 @skipif_vsphere_platform
 class TestMdsCacheTrimStandby(E2ETest):
