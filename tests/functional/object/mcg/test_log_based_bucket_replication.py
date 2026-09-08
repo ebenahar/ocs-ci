@@ -2,7 +2,12 @@ import logging
 
 import pytest
 
-from ocs_ci.framework.pytest_customization.marks import mcg, red_squad
+from ocs_ci.framework.pytest_customization.marks import (
+    mcg,
+    red_squad,
+    skipif_azure_with_logs_creds_are_missing,
+    skipif_external_mode,
+)
 from ocs_ci.framework.testlib import (
     MCGTest,
     ignore_leftover_label,
@@ -19,10 +24,16 @@ from ocs_ci.framework.testlib import (
 from ocs_ci.ocs import constants
 from ocs_ci.ocs.bucket_utils import (
     compare_bucket_object_list,
+    craft_s3_command,
     update_replication_policy,
     write_random_test_objects_to_bucket,
 )
-from ocs_ci.ocs.resources.mcg_replication_policy import AwsLogBasedReplicationPolicy
+from ocs_ci.ocs.resources.bucket_logging_manager import BucketLoggingManager
+from ocs_ci.ocs.resources.mcg_replication_policy import (
+    AwsLogBasedReplicationPolicy,
+    AzureLogBasedReplicationPolicy,
+    NoobaaLogBasedReplicationPolicy,
+)
 from ocs_ci.ocs.resources.mockup_bucket_logger import MockupBucketLogger
 from ocs_ci.ocs.resources.pod import get_noobaa_pods, get_pod_node
 from ocs_ci.ocs.scale_noobaa_lib import noobaa_running_node_restart
@@ -515,3 +526,323 @@ def delete_objects_from_source_and_wait_for_deletion_sync(
         target_bucket.name,
         timeout=timeout,
     ), f"Deletion sync failed to complete in {timeout} seconds"
+
+
+@mcg
+@red_squad
+@runs_on_provider
+@skipif_azure_with_logs_creds_are_missing
+@skipif_disconnected_cluster
+class TestAzureLogBasedBucketReplication(MCGTest):
+    """
+    Test log-based replication for Azure-backed namespace store buckets.
+
+    Azure log-based replication uses Azure's native change feed mechanism
+    rather than S3 access logs. No MockupBucketLogger or logs_bucket is needed;
+    the AzureLogBasedReplicationPolicy sets endpoint_type to "AZURE" and
+    NooBaa reads change events directly from the Azure storage account.
+
+    """
+
+    DEFAULT_TIMEOUT = 10 * 60
+
+    @pytest.fixture(scope="class", autouse=True)
+    def reduce_replication_delay_setup(self, add_env_vars_to_noobaa_core_class):
+        new_delay_in_milliseconds = 60 * 1000
+        new_env_var_tuples = [
+            (constants.BUCKET_REPLICATOR_DELAY_PARAM, new_delay_in_milliseconds),
+            (constants.BUCKET_LOG_REPLICATOR_DELAY_PARAM, new_delay_in_milliseconds),
+        ]
+        add_env_vars_to_noobaa_core_class(new_env_var_tuples)
+
+    @pytest.fixture()
+    def azure_log_based_replication_setup(self, mcg_obj_session, bucket_factory):
+        """
+        Set up Azure log-based replication with deletion sync.
+
+        Returns:
+            tuple: (source_bucket, target_bucket)
+
+        """
+        bucketclass_dict = {
+            "interface": "OC",
+            "namespace_policy_dict": {
+                "type": "Single",
+                "namespacestore_dict": {
+                    constants.AZURE_WITH_LOGS_PLATFORM: [(1, None)]
+                },
+            },
+        }
+        target_bucket = bucket_factory(bucketclass=bucketclass_dict)[0]
+
+        replication_policy = AzureLogBasedReplicationPolicy(
+            destination_bucket=target_bucket.name,
+            sync_deletions=True,
+        )
+
+        source_bucket = bucket_factory(
+            1, bucketclass=bucketclass_dict, replication_policy=replication_policy
+        )[0]
+
+        return source_bucket, target_bucket
+
+    @tier1
+    @polarion_id("OCS-XXXX")
+    def test_azure_log_based_deletion_sync(
+        self,
+        mcg_obj_session,
+        awscli_pod_session,
+        azure_log_based_replication_setup,
+    ):
+        """
+        Test Azure log-based replication with deletion sync.
+
+        1. Upload objects to the source bucket
+        2. Wait for replication to the target bucket
+        3. Delete objects from the source bucket
+        4. Wait for deletion sync to the target bucket
+
+        """
+        source_bucket, target_bucket = azure_log_based_replication_setup
+
+        write_random_test_objects_to_bucket(
+            io_pod=awscli_pod_session,
+            bucket_to_write=source_bucket.name,
+            file_dir=constants.AWSCLI_TEST_OBJ_DIR,
+            amount=3,
+            mcg_obj=mcg_obj_session,
+        )
+
+        assert compare_bucket_object_list(
+            mcg_obj_session,
+            source_bucket.name,
+            target_bucket.name,
+            timeout=self.DEFAULT_TIMEOUT,
+        ), f"Replication failed to complete in {self.DEFAULT_TIMEOUT} seconds"
+
+        awscli_pod_session.exec_cmd_on_pod(
+            craft_s3_command(
+                f"rm s3://{source_bucket.name} --recursive",
+                mcg_obj=mcg_obj_session,
+            )
+        )
+
+        assert compare_bucket_object_list(
+            mcg_obj_session,
+            source_bucket.name,
+            target_bucket.name,
+            timeout=self.DEFAULT_TIMEOUT,
+        ), f"Deletion sync failed to complete in {self.DEFAULT_TIMEOUT} seconds"
+
+    @tier2
+    @polarion_id("OCS-XXXX")
+    def test_azure_log_based_patch_deletion_sync(
+        self, mcg_obj_session, awscli_pod_session, bucket_factory
+    ):
+        """
+        Test patching Azure log-based deletion sync onto an existing bucket.
+
+        1. Create source and target buckets without replication
+        2. Patch the source with an AzureLogBasedReplicationPolicy
+        3. Upload objects and verify replication
+
+        """
+        bucketclass_dict = {
+            "interface": "OC",
+            "namespace_policy_dict": {
+                "type": "Single",
+                "namespacestore_dict": {
+                    constants.AZURE_WITH_LOGS_PLATFORM: [(1, None)]
+                },
+            },
+        }
+        target_bucket = bucket_factory(bucketclass=bucketclass_dict)[0]
+        source_bucket = bucket_factory(bucketclass=bucketclass_dict)[0]
+
+        replication_policy = AzureLogBasedReplicationPolicy(
+            destination_bucket=target_bucket.name,
+            sync_deletions=True,
+        )
+        update_replication_policy(source_bucket.name, replication_policy.to_dict())
+
+        write_random_test_objects_to_bucket(
+            io_pod=awscli_pod_session,
+            bucket_to_write=source_bucket.name,
+            file_dir=constants.AWSCLI_TEST_OBJ_DIR,
+            amount=3,
+            mcg_obj=mcg_obj_session,
+        )
+
+        assert compare_bucket_object_list(
+            mcg_obj_session,
+            source_bucket.name,
+            target_bucket.name,
+            timeout=self.DEFAULT_TIMEOUT,
+        ), f"Replication failed to complete in {self.DEFAULT_TIMEOUT} seconds"
+
+
+@mcg
+@red_squad
+@runs_on_provider
+@skipif_external_mode
+@skipif_disconnected_cluster
+class TestNoobaaLogBasedBucketReplication(MCGTest):
+    """
+    Test log-based replication between plain NooBaa buckets.
+
+    Uses NooBaa's guaranteed bucket logging feature to generate access logs
+    into a NooBaa logs bucket. The replication policy references this logs
+    bucket the same way as AWS log-based replication (via logs_location.logs_bucket).
+
+    No cloud credentials are needed - all buckets use the default NooBaa backing store.
+
+    """
+
+    DEFAULT_TIMEOUT = 10 * 60
+
+    @pytest.fixture(scope="class", autouse=True)
+    def reduce_replication_and_logging_delay_setup(
+        self, add_env_vars_to_noobaa_core_class
+    ):
+        new_delay_in_milliseconds = 60 * 1000
+        new_env_var_tuples = [
+            (constants.BUCKET_REPLICATOR_DELAY_PARAM, new_delay_in_milliseconds),
+            (constants.BUCKET_LOG_REPLICATOR_DELAY_PARAM, new_delay_in_milliseconds),
+            (constants.BUCKET_LOG_UPLOADER_DELAY_PARAM, new_delay_in_milliseconds),
+        ]
+        add_env_vars_to_noobaa_core_class(new_env_var_tuples)
+
+    @pytest.fixture(scope="class", autouse=True)
+    def enable_guaranteed_logging(self, enable_guaranteed_bucket_logging):
+        enable_guaranteed_bucket_logging()
+
+    @pytest.fixture()
+    def noobaa_log_based_replication_setup(
+        self, mcg_obj_session, awscli_pod_session, bucket_factory
+    ):
+        """
+        Set up NooBaa-to-NooBaa log-based replication with deletion sync.
+
+        Creates three plain NooBaa buckets (source, target, logs), enables
+        bucket logging on the source, and configures a NoobaaLogBasedReplicationPolicy.
+
+        Returns:
+            tuple: (source_bucket, target_bucket, logs_bucket)
+
+        """
+        target_bucket = bucket_factory()[0]
+        logs_bucket = bucket_factory()[0]
+        source_bucket = bucket_factory()[0]
+
+        logs_manager = BucketLoggingManager(mcg_obj_session, awscli_pod_session)
+        logs_manager.put_bucket_logging(source_bucket.name, logs_bucket.name)
+
+        replication_policy = NoobaaLogBasedReplicationPolicy(
+            destination_bucket=target_bucket.name,
+            sync_deletions=True,
+            logs_bucket=logs_bucket.name,
+        )
+        update_replication_policy(source_bucket.name, replication_policy.to_dict())
+
+        return source_bucket, target_bucket, logs_bucket
+
+    @tier1
+    @polarion_id("OCS-XXXX")
+    def test_noobaa_log_based_deletion_sync(
+        self,
+        mcg_obj_session,
+        awscli_pod_session,
+        noobaa_log_based_replication_setup,
+    ):
+        """
+        Test NooBaa-to-NooBaa log-based replication with deletion sync.
+
+        1. Upload objects to the source bucket
+        2. Wait for replication to the target bucket
+        3. Delete objects from the source bucket
+        4. Wait for deletion sync to the target bucket
+
+        """
+        source_bucket, target_bucket, _ = noobaa_log_based_replication_setup
+
+        write_random_test_objects_to_bucket(
+            io_pod=awscli_pod_session,
+            bucket_to_write=source_bucket.name,
+            file_dir=constants.AWSCLI_TEST_OBJ_DIR,
+            amount=3,
+            mcg_obj=mcg_obj_session,
+        )
+
+        assert compare_bucket_object_list(
+            mcg_obj_session,
+            source_bucket.name,
+            target_bucket.name,
+            timeout=self.DEFAULT_TIMEOUT,
+        ), f"Replication failed to complete in {self.DEFAULT_TIMEOUT} seconds"
+
+        awscli_pod_session.exec_cmd_on_pod(
+            craft_s3_command(
+                f"rm s3://{source_bucket.name} --recursive",
+                mcg_obj=mcg_obj_session,
+            )
+        )
+
+        assert compare_bucket_object_list(
+            mcg_obj_session,
+            source_bucket.name,
+            target_bucket.name,
+            timeout=self.DEFAULT_TIMEOUT,
+        ), f"Deletion sync failed to complete in {self.DEFAULT_TIMEOUT} seconds"
+
+    @tier2
+    @polarion_id("OCS-XXXX")
+    def test_noobaa_log_based_deletion_sync_opt_out(
+        self,
+        mcg_obj_session,
+        awscli_pod_session,
+        noobaa_log_based_replication_setup,
+    ):
+        """
+        Test that deletion sync can be disabled for NooBaa-to-NooBaa replication.
+
+        1. Upload objects and wait for replication
+        2. Disable deletion sync
+        3. Delete source objects
+        4. Verify objects remain on the target
+
+        """
+        source_bucket, target_bucket, _ = noobaa_log_based_replication_setup
+
+        write_random_test_objects_to_bucket(
+            io_pod=awscli_pod_session,
+            bucket_to_write=source_bucket.name,
+            file_dir=constants.AWSCLI_TEST_OBJ_DIR,
+            amount=3,
+            mcg_obj=mcg_obj_session,
+        )
+
+        assert compare_bucket_object_list(
+            mcg_obj_session,
+            source_bucket.name,
+            target_bucket.name,
+            timeout=self.DEFAULT_TIMEOUT,
+        ), f"Replication failed to complete in {self.DEFAULT_TIMEOUT} seconds"
+
+        logger.info("Disabling the deletion sync")
+        disabled_del_sync_policy = source_bucket.replication_policy
+        disabled_del_sync_policy["rules"][0]["sync_deletions"] = False
+        update_replication_policy(source_bucket.name, disabled_del_sync_policy)
+
+        awscli_pod_session.exec_cmd_on_pod(
+            craft_s3_command(
+                f"rm s3://{source_bucket.name} --recursive",
+                mcg_obj=mcg_obj_session,
+            )
+        )
+
+        assert not compare_bucket_object_list(
+            mcg_obj_session,
+            source_bucket.name,
+            target_bucket.name,
+            timeout=self.DEFAULT_TIMEOUT,
+        ), "Deletion sync completed even though the policy was disabled!"

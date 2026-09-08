@@ -55,7 +55,6 @@ from ocs_ci.deployment.hub_spoke import hypershift_cluster_factory
 from ocs_ci.utility.nfs_utils import check_cluster_resources_for_nfs
 from ocs_ci.ocs.node import check_cluster_resources
 
-
 # tier marks
 
 tier1 = pytest.mark.tier1(value=1)
@@ -254,6 +253,21 @@ skipif_aws_creds_are_missing = pytest.mark.skipif(
     ),
     reason=(
         "AWS credentials weren't found in the local auth.yaml "
+        "and couldn't be fetched from the cloud"
+    ),
+)
+
+skipif_azure_with_logs_creds_are_missing = pytest.mark.skipif(
+    (
+        load_auth_config()
+        .get("AUTH", {})
+        .get("AZURE_WITH_LOGS", {})
+        .get("LOGS_ANALYTICS_WORKSPACE_ID")
+        is None
+        and update_config_from_s3() is None
+    ),
+    reason=(
+        "Azure with logs credentials weren't found in the local auth.yaml "
         "and couldn't be fetched from the cloud"
     ),
 )

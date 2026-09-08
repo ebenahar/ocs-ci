@@ -105,6 +105,38 @@ class AzureLogBasedReplicationPolicy(LogBasedReplicationPolicy):
         return dict
 
 
+class NoobaaLogBasedReplicationPolicy(LogBasedReplicationPolicy):
+    """
+    A class to handle the NooBaa-to-NooBaa log-based bucket replication policy JSON structure.
+
+    NooBaa log-based replication uses the same logs_location structure as AWS,
+    where a NooBaa bucket serves as the logs bucket via the guaranteed bucket logging feature.
+
+    """
+
+    def __init__(
+        self,
+        destination_bucket,
+        sync_deletions=False,
+        logs_bucket="",
+        prefix="",
+        logs_location_prefix="",
+        sync_versions=False,
+    ):
+        super().__init__(destination_bucket, sync_deletions, sync_versions, prefix)
+        self.logs_bucket = logs_bucket
+        self.logs_location_prefix = logs_location_prefix
+
+    def to_dict(self):
+        dict = super().to_dict()
+        dict["log_replication_info"]["logs_location"] = {
+            "logs_bucket": self.logs_bucket,
+            "prefix": self.logs_location_prefix,
+        }
+
+        return dict
+
+
 class ReplicationPolicyWithVersioning(McgReplicationPolicy):
     """
     A class to handle the MCG bucket replication policy JSON structure with versioning.
